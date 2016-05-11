@@ -58,14 +58,21 @@ public class PlayerMovement : MonoBehaviour {
             //forward mag of 1
             Vector3 forward = transform.forward/Input.GetAxis("Horizontal");
             //gives a vector exactly 45 degrees
-            Vector3 turnVec = (transform.forward + transform.right* Input.GetAxis("Horizontal")).normalized;
+
+            Vector3 turnVec = (transform.right * Input.GetAxis("Horizontal"));
+            Vector3 moveVec = transform.forward;
+            if(turnVec.magnitude > 0.001)
+            {
+                moveVec = (transform.forward + turnVec).normalized;
+            }
+            
            
             //get the amount to increment position by
             increment += speed / 100;
             //increment player position and lerp movement
             //Debug.Log(turnAmount);
             //Debug.Log(moveDir);
-            transform.position = Vector3.Lerp(transform.position, transform.position + turnVec, increment);//movedir was transform.forward
+            transform.position = Vector3.Lerp(transform.position, transform.position + moveVec, increment);//movedir was transform.forward
         }
     }
     public void GetTurning()
@@ -73,7 +80,7 @@ public class PlayerMovement : MonoBehaviour {
         //get horizontal tilt (banks dragon while turning)
         float tiltAroundZ = -Input.GetAxis("Horizontal") * tiltAngle;
         //physically turns dragon right and left
-        float tiltAroundY = -Input.GetAxis("Horizontal") * turnAngle;
+        float tiltAroundY = Input.GetAxis("Horizontal") * turnAngle;
         //get vertical tilt (dragon climbs and dives)
         float tiltAroundX = Input.GetAxis("Vertical") * tiltAngle * invert;
         //create a new quaternion for rotation amount
