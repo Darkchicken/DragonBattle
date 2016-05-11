@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour {
     public float tiltAngle = 30.0F;
     //how far to turn left and right
     public float turnAngle = 60.0F;
+    //number of degrees the dragon is at on y axis
+    float currentRotation = 0;
     Animator anim;
     
     public float speed = 3f;
@@ -80,13 +82,18 @@ public class PlayerMovement : MonoBehaviour {
         //get horizontal tilt (banks dragon while turning)
         float tiltAroundZ = -Input.GetAxis("Horizontal") * tiltAngle;
         //physically turns dragon right and left
+
         float tiltAroundY = Input.GetAxis("Horizontal") * turnAngle;
+        ///if you replace this as the y component of target, it kinda works
+        //currentRotation = tiltAroundY;
+   
         //get vertical tilt (dragon climbs and dives)
         float tiltAroundX = Input.GetAxis("Vertical") * tiltAngle * invert;
         //create a new quaternion for rotation amount
         Quaternion target = Quaternion.Euler(tiltAroundX, tiltAroundY, tiltAroundZ);
         //apply rotation to transform
         transform.rotation = Quaternion.Slerp(transform.rotation, target, Time.deltaTime * smooth);
+       
         
     }
     public void Animate()
