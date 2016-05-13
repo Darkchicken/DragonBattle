@@ -8,7 +8,8 @@ public class PlayerController : MonoBehaviour {
     Animator anim;
     
     public float speed = 5f;
-    public float turnSpeed = 30f;
+    public float turnSpeed = 60f;
+    public float vertSpeed = 30f;
     float increment;
     //check if flight is inverted
     float invert = 1; //1 is regular, -1 is inverted
@@ -59,23 +60,44 @@ public class PlayerController : MonoBehaviour {
     }
     public void GetTurning()
     {
-
-        Vector3 newRotation = transform.eulerAngles;
+        Vector3 currentRotation = transform.eulerAngles;
+        Vector3 newRotation = currentRotation;
+       
         // float turnAmount = Input.GetAxis("Horizontal") * turnSpeed;
         float turnY = Input.GetAxis("Mouse X") * turnSpeed;
-        float turnX = Input.GetAxis("Mouse Y") * turnSpeed;
-
-
-        //transform.Rotate(turnX, turnY, 0);
-
-        newRotation.x += turnX;
+        float turnX = Input.GetAxis("Mouse Y") * vertSpeed;
+        //approaches 1 climbing straight up, -1 diving straight down
+        float dragonAngle = Vector3.Dot(transform.forward, Vector3.up);
+     
+        //player steering up
+        if(turnX < 0)
+        {
+            if (dragonAngle < 0.8)
+            {newRotation.x += turnX;}    
+        }
+        //player steering down
+        else if (turnX > 0)
+        {
+            if (dragonAngle > -0.8)
+            {newRotation.x += turnX;}
+        }
+        //no vertical steering
+        else
+        {
+            //newRotation.x = 0;
+        }
        
+
         newRotation.y += turnY;
         //newRotation.z = 0;//.eulerAngles.z = 0;
+        //if not turning up or down
+        /*
         if(turnX == 0)
         {
             newRotation.x = 0;
         }
+        */
+       
         transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, newRotation, Time.deltaTime * smooth);
         
        
