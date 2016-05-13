@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
     //check if flight is inverted
     float invert = 1; //1 is regular, -1 is inverted
     Rigidbody rb;
+
 	// Use this for initialization
 	void Start ()
     {
@@ -22,6 +23,7 @@ public class PlayerController : MonoBehaviour {
         //get animator of player's dragon model
         anim = GetComponentInChildren<Animator>();
         initialZRotation = transform.rotation.z;
+        
 	}
 	
 	// Update is called once per frame
@@ -68,9 +70,16 @@ public class PlayerController : MonoBehaviour {
         float turnX = Input.GetAxis("Mouse Y") * vertSpeed;
         //approaches 1 climbing straight up, -1 diving straight down
         float dragonAngle = Vector3.Dot(transform.forward, Vector3.up);
-     
+        //amount to tip dragon to bank turns (need to be moving and turning)
+        float turnZ = Input.GetAxis("Mouse X") *Input.GetAxis("Vertical") *turnSpeed * -1;//-1 to invert turn
+        //approaches 1   when level, 0 when sideways
+        float dragonTilt = Vector3.Dot(transform.up, Vector3.up);
+
+        /**************
+        Handle Steering in vertical direction
+        ***************/
         //player steering up
-        if(turnX < 0)
+        if (turnX < 0)
         {
             if (dragonAngle < 0.8)
             {newRotation.x += turnX;}    
@@ -86,9 +95,32 @@ public class PlayerController : MonoBehaviour {
         {
             //newRotation.x = 0;
         }
-       
 
+        /**************
+        Handle Steering in horizontal direction
+        ***************/
         newRotation.y += turnY;
+
+        /**************
+        Handle Banking with horizontal steering
+        ***************/
+        //if the player is moving and turning
+        if (turnZ != 0)
+        {
+            //as long as the player hasnt tilted further than halfway
+            if (dragonTilt > 0.4)
+            {
+                //add to z rotation
+                newRotation.z += turnZ;
+            }
+        }
+        //if the player is no longer moving and turning
+        else
+        {
+            newRotation.z = 0;
+
+        }
+
         //newRotation.z = 0;//.eulerAngles.z = 0;
         //if not turning up or down
         /*
@@ -97,7 +129,7 @@ public class PlayerController : MonoBehaviour {
             newRotation.x = 0;
         }
         */
-       
+
         transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, newRotation, Time.deltaTime * smooth);
         
        
