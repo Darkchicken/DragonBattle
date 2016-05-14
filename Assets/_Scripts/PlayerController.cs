@@ -36,6 +36,7 @@ public class PlayerController : MonoBehaviour {
         {
             InvertFlight();
         }
+        
     }
     void FixedUpdate()
     {
@@ -128,28 +129,23 @@ public class PlayerController : MonoBehaviour {
     }
     public void Animate()
     {
-
-        Debug.Log(anim.GetBool("fly"));
-        if (Input.GetAxis("Vertical") > 0)
+        //A button on remote
+        if (Input.GetButtonDown("Fire1"))
         {
-            if(inMotion == false)
-            {
-                inMotion = true;
-                anim.SetTrigger("fly");
-            }
-  
+            anim.SetBool("Airborne", true);
+        }
+        //set velocity variable to vertical axis
+        anim.SetFloat("Velocity", Input.GetAxis("Vertical"));
+        if(Input.GetAxis("Vertical") == 0)
+        {
+            anim.SetBool("Moving", false);
         }
         else
         {
-            if(inMotion == true)
-            {
-                inMotion = false;
-                anim.ResetTrigger("fly");
-                anim.SetTrigger("flyIdle");
-            }
-            
+            anim.SetBool("Moving", true);
         }
        
+
     }
     
     public void InvertFlight()
