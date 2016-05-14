@@ -4,6 +4,7 @@ using System.Collections;
 public class PlayerController : MonoBehaviour {
     //smoothing for leveling out turns
     public float smooth = 2.0F;
+    float turnSmoothing = 30f;
     float initialZRotation = 0;
     Animator anim;
     
@@ -14,7 +15,8 @@ public class PlayerController : MonoBehaviour {
     //check if flight is inverted
     float invert = 1; //1 is regular, -1 is inverted
     Rigidbody rb;
-
+    //animation triggers
+    bool inMotion = false;
 	// Use this for initialization
 	void Start ()
     {
@@ -62,16 +64,16 @@ public class PlayerController : MonoBehaviour {
     }
     public void GetTurning()
     {
+       
         Vector3 currentRotation = transform.eulerAngles;
         Vector3 newRotation = currentRotation;
-       
-        // float turnAmount = Input.GetAxis("Horizontal") * turnSpeed;
-        float turnY = Input.GetAxis("Mouse X") * turnSpeed;
+      
+        float turnY = Input.GetAxis("Mouse X") * turnSpeed; //Input.GetAxis("Horizontal") * turnSpeed;//
         float turnX = Input.GetAxis("Mouse Y") * vertSpeed;
         //approaches 1 climbing straight up, -1 diving straight down
         float dragonAngle = Vector3.Dot(transform.forward, Vector3.up);
         //amount to tip dragon to bank turns (need to be moving and turning)
-        float turnZ = Input.GetAxis("Mouse X") *Input.GetAxis("Vertical") *turnSpeed * -1;//-1 to invert turn
+        float turnZ = Input.GetAxis("Mouse X") * Mathf.Abs(Input.GetAxis("Vertical")) *turnSpeed * -1;//-1 to invert turn
         //approaches 1   when level, 0 when sideways
         float dragonTilt = Vector3.Dot(transform.up, Vector3.up);
 
@@ -93,6 +95,7 @@ public class PlayerController : MonoBehaviour {
         //no vertical steering
         else
         {
+            newRotation.x=Mathf.LerpAngle(currentRotation.x, 0, Time.deltaTime* turnSmoothing);// * smooth);
             //newRotation.x = 0;
         }
 
@@ -117,41 +120,38 @@ public class PlayerController : MonoBehaviour {
         //if the player is no longer moving and turning
         else
         {
-            newRotation.z = 0;
-
+            newRotation.z = Mathf.LerpAngle(currentRotation.z, 0, Time.deltaTime* turnSmoothing); 
         }
-
-        //newRotation.z = 0;//.eulerAngles.z = 0;
-        //if not turning up or down
-        /*
-        if(turnX == 0)
-        {
-            newRotation.x = 0;
-        }
-        */
 
         transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, newRotation, Time.deltaTime * smooth);
-        
-       
-
-
-
-
-
 
     }
     public void Animate()
     {
-        if (rb.velocity.magnitude > 0)
+
+        Debug.Log(anim.GetBool("fly"));
+        if (Input.GetAxis("Vertical") > 0)
         {
-            anim.SetBool("flyGlide", true);
+            if(inMotion == false)
+            {
+                inMotion = true;
+                anim.SetTrigger("fly");
+            }
+  
         }
         else
         {
-            anim.SetBool("flyGlide", false);
+            if(inMotion == true)
+            {
+                inMotion = false;
+                anim.ResetTrigger("fly");
+                anim.SetTrigger("flyIdle");
+            }
+            
         }
        
     }
+    
     public void InvertFlight()
     {
         //swap sign of invert
