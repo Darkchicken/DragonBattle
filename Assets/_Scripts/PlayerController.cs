@@ -8,7 +8,10 @@ public class PlayerController : MonoBehaviour {
     float initialZRotation = 0;
     Animator anim;
     
-    public float speed = 5f;
+    /// <summary>
+    /// Dragon Stats
+    /// </summary>
+    public float speed = 10f;
     public float turnSpeed = 60f;
     public float vertSpeed = 30f;
     float increment;
@@ -44,8 +47,8 @@ public class PlayerController : MonoBehaviour {
         GetMovement();
         //check if player is turning
         GetTurning();
-       
-       
+        //check if player has activated an attack/ability
+        GetAbilities();
         //animation handling
         Animate();
        
@@ -56,7 +59,8 @@ public class PlayerController : MonoBehaviour {
 
        
            //movevec is transform.forward (magnitude of 1) * the axis (between 1 and -1)
-            Vector3 moveVec = transform.forward * Input.GetAxis("Vertical");
+           // + transform.right (magnitude of 1 )* the horizontal axis (between 1 and -1)
+            Vector3 moveVec = (transform.forward * Input.GetAxis("Vertical")) + (transform.right * Input.GetAxis("Horizontal"));
             //get the amount to increment position by
             increment += speed / 100;
             //increment player position and lerp movement
@@ -96,8 +100,8 @@ public class PlayerController : MonoBehaviour {
         //no vertical steering
         else
         {
-            newRotation.x=Mathf.LerpAngle(currentRotation.x, 0, Time.deltaTime* turnSmoothing);// * smooth);
-            //newRotation.x = 0;
+           // newRotation.x=Mathf.LerpAngle(currentRotation.x, 0, Time.deltaTime* turnSmoothing);// * smooth);
+            
         }
 
         /**************
@@ -126,6 +130,17 @@ public class PlayerController : MonoBehaviour {
 
         transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, newRotation, Time.deltaTime * smooth);
 
+    }
+    public void GetAbilities()
+    {
+        if(Input.GetAxis("RightTrigger") > 0.5)
+        {
+            anim.SetBool("BreatheFire", true);
+        }
+        else
+        {
+            anim.SetBool("BreatheFire", false);
+        }
     }
     public void Animate()
     {
