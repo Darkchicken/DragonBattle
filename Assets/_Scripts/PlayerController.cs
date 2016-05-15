@@ -210,7 +210,8 @@ public class PlayerController : MonoBehaviour {
                 anim.SetBool("Airborne", true);
                 grounded = false;
                 rb.useGravity = false;
-                rb.angularVelocity.Set(0,0,0);
+                rb.angularVelocity.Set(0, 0, 0);
+                rb.constraints = RigidbodyConstraints.None;
             }
             //if the dragon is flying and near the ground
             else if (!grounded && IsGrounded())
@@ -219,7 +220,9 @@ public class PlayerController : MonoBehaviour {
                 anim.SetBool("Airborne", false);
                 grounded = true;
                 rb.useGravity = true;
-               
+                rb.angularVelocity.Set(0, 0, 0);
+                rb.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationZ;
+
             }
         }
         //set velocity variable to vertical axis
