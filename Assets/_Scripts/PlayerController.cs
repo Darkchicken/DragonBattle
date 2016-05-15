@@ -18,11 +18,13 @@ public class PlayerController : MonoBehaviour {
     //check if flight is inverted
     float invert = 1; //1 is regular, -1 is inverted
     Rigidbody rb;
-    //animation triggers
-    bool inMotion = false;
+
+    float distToGround = 0;
+    bool grounded = true;
 	// Use this for initialization
 	void Start ()
     {
+        distToGround = GetComponent<Collider>().bounds.extents.y;
         //get player object's rigidbody
         rb = GetComponent<Rigidbody>();
         //get animator of player's dragon model
@@ -68,6 +70,60 @@ public class PlayerController : MonoBehaviour {
         
     }
     public void GetTurning()
+    {
+        if(grounded)
+        {GetGroundTurning();}
+        else if(!grounded)
+        {GetAirTurning();}
+    }
+    public void GetGroundTurning()
+    {
+        Vector3 currentRotation = transform.eulerAngles;
+        Vector3 newRotation = currentRotation;
+        //handles horizontal turning
+        float turnY = Input.GetAxis("Mouse X") * turnSpeed; 
+        //allows dragon to look up and down (doesnt rotate dragon, just camera)
+        float turnX = Input.GetAxis("Mouse Y") * vertSpeed;
+        //approaches 1 climbing straight up, -1 diving straight down
+        float dragonAngle = Vector3.Dot(transform.forward, Vector3.up);
+     
+       
+
+        /**************
+        Handle Steering in vertical direction
+        ***************/
+        //player steering up
+        if (turnX < 0)
+        {
+            /*
+            if (dragonAngle < 0.8)
+            { newRotation.x += turnX; }
+            */
+        }
+        //player steering down
+        else if (turnX > 0)
+        {
+            /*
+            if (dragonAngle > -0.8)
+            { newRotation.x += turnX; }
+            */
+        }
+        //no vertical steering
+        else
+        {
+            // newRotation.x=Mathf.LerpAngle(currentRotation.x, 0, Time.deltaTime* turnSmoothing);// * smooth);
+
+        }
+
+        /**************
+        Handle Steering in horizontal direction
+        ***************/
+        newRotation.y += turnY;
+
+
+        transform.eulerAngles = Vector3.Lerp(transform.eulerAngles, newRotation, Time.deltaTime * smooth);
+    }
+    public void GetAirTurning()
     {
        
         Vector3 currentRotation = transform.eulerAngles;
@@ -144,10 +200,27 @@ public class PlayerController : MonoBehaviour {
     }
     public void Animate()
     {
-        //A button on remote
+        //A button on remote (handles taking off and landing)
         if (Input.GetButtonDown("Fire1"))
         {
-            anim.SetBool("Airborne", true);
+            //if the dragon is walking
+            if (grounded)
+            {
+                //play flying animation
+                anim.SetBool("Airborne", true);
+                grounded = false;
+                rb.useGravity = false;
+                rb.angularVelocity.Set(0,0,0);
+            }
+            //if the dragon is flying and near the ground
+            else if (!grounded && IsGrounded())
+            {
+                //play walking animation
+                anim.SetBool("Airborne", false);
+                grounded = true;
+                rb.useGravity = true;
+               
+            }
         }
         //set velocity variable to vertical axis
         anim.SetFloat("Velocity", Input.GetAxis("Vertical"));
@@ -162,7 +235,13 @@ public class PlayerController : MonoBehaviour {
        
 
     }
-    
+
+    //Creates a raycast to check if the player is near the ground (to prep for landing)
+    bool IsGrounded()
+    {
+        return Physics.Raycast(transform.position, -Vector3.up, distToGround + 0.2f);
+    }
+
     public void InvertFlight()
     {
         //swap sign of invert
